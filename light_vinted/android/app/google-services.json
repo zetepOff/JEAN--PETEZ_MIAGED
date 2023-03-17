@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "91606143072",
+    "project_id": "light-tinted-miaged",
+    "storage_bucket": "light-tinted-miaged.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91606143072:android:c70e9582c56b6ee329f305",
+        "android_client_info": {
+          "package_name": "com.example.light_vinted"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "91606143072-4p71qsv7tvtouh5t1ecmr1fs27qkjl2l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASc3IJii0I7r6lLL12uMuJWfrwoEEq7xw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91606143072-4p71qsv7tvtouh5t1ecmr1fs27qkjl2l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "91606143072-vcc5fop2hdouh4rn33ovuok739fd821f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.lightVinted"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

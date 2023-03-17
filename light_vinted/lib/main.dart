@@ -1,25 +1,37 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'pages/AcheterPage.dart';
+
 
 void main() {
   runApp(MyApp());
 }
 
+Future<void> initializeFirebase() async {
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
+}
+
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  static const String _title = 'MIAGED';
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'light vinted',
+        title: _title,
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         ),
-        home: MyHomePage(),
+        home: LoginPage(),
       ),
     );
   }
@@ -43,164 +55,131 @@ class MyAppState extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  //tentative d'avoir le mdp visible au clic sur l'icon
+  Icon iconEye = Icon(Icons.visibility);
+  bool obscure = true;
+  void showPassword() {
+    if (obscure == true) {
+      obscure = false;
+      iconEye = Icon(Icons.visibility_off);
+    } else {
+      obscure = true;
+      iconEye = Icon(Icons.visibility);
+    }
+  }
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+class LoginPage extends StatelessWidget {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+  void _onLoginButtonPressed(BuildContext context) {
+    // Récupérer les valeurs des champs de texte
+    final String username = usernameController.text;
+    final String password = passwordController.text;
+
+    // Vérifier si l'utilisateur existe
+    bool userExists = false; // Remplacer par la vérification en base de données
+
+    if (username == 'admin' && password == 'admin') {
+      userExists = true;
+    }
+
+    if (userExists) {
+      // Rediriger l'utilisateur vers la page suivante
+      //Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AcheterPage()),
+      );
+    } else {
+      // Afficher un log dans la console et ne rien faire
+      print('L\'utilisateur n\'existe pas');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = FavoritesPage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.cyan,
+        title: Text('MIAGED'),
+        // voir pourquoi ça marche pas style: TextStyle(color: Colors.white,), // Couleur du texte du titre
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  hintText: 'Login',
+                ),
               ),
             ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                ),
               ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _onLoginButtonPressed(context),
+              child: Text('Se connecter'),
             ),
           ],
         ),
-      );
-    });
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
 }
 
-class FavoritesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
+class User {
+  final int id;
+  final String email;
+  final String password;
+  final String anniversaire;
+  final String adresse;
+  final int codePostal;
+  final String ville;
 
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
+  User({
+    required this.id,
+    required this.email,
+    required this.password,
+    required this.anniversaire,
+    required this.adresse,
+    required this.codePostal,
+    required this.ville,
+  });
 
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
-          ),
-      ],
-    );
-  }
-}
+  get login => null;
 
-class BigCard extends StatelessWidget {
-  const BigCard({
-    Key? key,
-    required this.pair,
-  }) : super(key: key);
-
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-
-    var style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-
-    return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: pair.asPascalCase,
-        ),
-      ),
+  User copyWith({
+    int? id,
+    String? email,
+    String? password,
+    String? anniversaire,
+    String? adresse,
+    int? codePostal,
+    String? ville,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      anniversaire: anniversaire ?? this.anniversaire,
+      adresse: adresse ?? this.adresse,
+      codePostal: codePostal ?? this.codePostal,
+      ville: ville ?? this.ville,
     );
   }
 }
